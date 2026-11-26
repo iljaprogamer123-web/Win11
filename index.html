@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Win11 Touch OS</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: none; }
+  body, html { width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; background: #000; }
+  #desktop {
+    position: relative; width: 100vw; height: calc(100vh - 48px);
+    background: radial-gradient(circle at 68% 45%, #38bdf8 0%, #1d4ed8 32%, #1e1b4b 68%, #090d16 100%);
+    display: flex; flex-wrap: wrap; align-content: flex-start; padding: 12px; gap: 12px; transition: background 0.4s;
+  }
+  .icon { width: 76px; height: 84px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; color: #fff; text-align: center; font-size: 11px; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+  .icon:active { background: rgba(255,255,255,0.15); }
+  .icon svg { width: 34px; height: 34px; margin-bottom: 6px; fill: #60a5fa; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); }
+  #taskbar { position: absolute; bottom: 0; left: 0; width: 100vw; height: 48px; background: rgba(20, 24, 36, 0.85); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; padding: 0 16px; z-index: 10000; border-top: 1px solid rgba(255,255,255,0.1); }
+  .tb-btn { padding: 6px 14px; border-radius: 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #fff; font-size: 13px; cursor: pointer; }
+  #start-menu { position: absolute; bottom: 56px; left: 50%; transform: translateX(-50%); width: 260px; background: rgba(28, 32, 46, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; display: none; flex-direction: column; padding: 12px; gap: 6px; z-index: 10001; color: #fff; }
+  .start-item { padding: 10px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .start-item:active { background: rgba(255,255,255,0.12); }
+  .window { position: absolute; top: 24px; left: 24px; width: 320px; height: 380px; background: #1e1e24; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,0.6); display: flex; flex-direction: column; overflow: hidden; z-index: 100; }
+  .win-header { height: 38px; background: #252530; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; color: #e2e8f0; font-size: 13px; cursor: grab; }
+  .win-close { width: 14px; height: 14px; border-radius: 50%; border: none; background: #ef4444; cursor: pointer; }
+  .win-body { flex: 1; background: #121216; color: #fff; overflow-y: auto; position: relative; padding: 12px; }
+  canvas { width: 100%; height: 100%; display: block; }
+  .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  .calc-btn { background: #252530; border: none; color: #fff; padding: 15px; font-size: 17px; border-radius: 4px; }
+  .calc-display { grid-column: span 4; background: #000; padding: 14px; text-align: right; font-size: 22px; color: #60a5fa; }
+  iframe { width: 100%; height: calc(100% - 34px); border: none; background: #fff; }
+  .chat-container { display: flex; flex-direction: column; height: 100%; }
+  .chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+  .msg { padding: 8px 12px; border-radius: 8px; font-size: 13px; max-width: 80%; }
+  .msg.user { background: #2563eb; align-self: flex-end; }
+  .msg.ai { background: #252530; align-self: flex-start; }
+  .chat-input { display: flex; padding-top: 8px; gap: 6px; }
+  .chat-input input, .setting-item select, .setting-item input { flex: 1; background: #252530; border: 1px solid #3f3f46; color: #fff; padding: 8px; border-radius: 6px; outline: none; width: 100%; margin-top: 4px; }
+  .setting-item { margin-bottom: 14px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div id="desktop">
+  <div class="icon" onclick="openApp('mypc')"><svg viewBox="0 0 24 24"><path d="M20 18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/></svg><span data-i18n="mypc">This PC</span></div>
+  <div class="icon" onclick="openApp('paint')"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8z"/></svg><span data-i18n="paint">Paint</span></div>
+  <div class="icon" onclick="openApp('notepad')"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg><span data-i18n="notepad">Notepad</span></div>
+  <div class="icon" onclick="openApp('calc')"><svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg><span data-i18n="calc">Calculator</span></div>
+  <div class="icon" onclick="openApp('browser')"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1 17.93A8.01 8.01 0 0 1 4 12c0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54A1.99 1.99 0 0 0 16 16h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41a8 8 0 0 1 2.9 12.8z"/></svg><span data-i18n="browser">Browser</span></div>
+  <div class="icon" onclick="openApp('copilot')"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-4H7v-2h4V7h2v4h4v2h-4v4z"/></svg><span data-i18n="copilot">Copilot</span></div>
+  <div class="icon" onclick="openApp('settings')"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.61l-1.92-3.32a.5.5 0 0 0-.59-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84a.48.48 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.5.5 0 0 0-.59.22L2.74 8.87a.5.5 0 0 0 .12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.5.5 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.5.5 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"/></svg><span data-i18n="settings">Settings</span></div>
+</div>
+<div id="taskbar"><button class="tb-btn" onclick="toggleStart()" data-i18n="start">Start</button></div>
+<div id="start-menu">
+  <div class="start-item" onclick="openApp('mypc', true)" data-i18n="mypc">This PC</div>
+  <div class="start-item" onclick="openApp('paint', true)" data-i18n="paint">Paint</div>
+  <div class="start-item" onclick="openApp('notepad', true)" data-i18n="notepad">Notepad</div>
+  <div class="start-item" onclick="openApp('calc', true)" data-i18n="calc">Calculator</div>
+  <div class="start-item" onclick="openApp('browser', true)" data-i18n="browser">Browser</div>
+  <div class="start-item" onclick="openApp('copilot', true)" data-i18n="copilot">Copilot</div>
+  <div class="start-item" onclick="openApp('settings', true)" data-i18n="settings">Settings</div>
+</div>
+<script>
+  let zIndex = 100, lang = 'en', wallIdx = 0;
+  const walls = [
+    'radial-gradient(circle at 68% 45%, #38bdf8 0%, #1d4ed8 32%, #1e1b4b 68%, #090d16 100%)',
+    'radial-gradient(circle at 50% 45%, #ffffff 0%, #bae6fd 35%, #60a5fa 70%, #2563eb 100%)',
+    'radial-gradient(circle at 30% 40%, #c084fc 0%, #4f46e5 40%, #0f172a 85%)'
+  ];
+  const i18n = {
+    en: { start:'Start', mypc:'This PC', paint:'Paint', notepad:'Notepad', calc:'Calculator', browser:'Browser', copilot:'Copilot', settings:'Settings', langLbl:'Language:', wallLbl:'Wallpaper (Win11):', w0:'Win11 Bloom Dark', w1:'Win11 Bloom Light', w2:'Win11 Purple', winCol:'Window Color:', res:'Resolution', hi:'Hi! How can I help?', reply:'Reply to: ' },
+    ru: { start:'Пуск', mypc:'Мой ПК', paint:'Paint', notepad:'Блокнот', calc:'Калькулятор', browser:'Браузер', copilot:'Copilot', settings:'Настройки', langLbl:'Язык системы:', wallLbl:'Обои (Win11):', w0:'Win11 Лепесток (Тёмные)', w1:'Win11 Лепесток (Светлые)', w2:'Win11 Фиолетовые', winCol:'Цвет окон:', res:'Разрешение', hi:'Привет! Чем помочь?', reply:'Ответ на: ' }
+  };
+  function applyLang() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.getAttribute('data-i18n');
+      if (i18n[lang][k]) el.textContent = i18n[lang][k];
+    });
+  }
+  function setLang(l) {
+    lang = l; applyLang();
+    const sw = document.getElementById('win-settings');
+    if (sw) { sw.remove(); openApp('settings'); }
+  }
+  function setWall(idx) { wallIdx = +idx; document.getElementById('desktop').style.background = walls[wallIdx]; }
+  function toggleStart(forceClose) {
+    const m = document.getElementById('start-menu');
+    m.style.display = forceClose ? 'none' : (m.style.display === 'flex' ? 'none' : 'flex');
+  }
+  function openApp(id, fromStart) {
+    if (fromStart) toggleStart(true);
+    const ex = document.getElementById('win-' + id);
+    if (ex) { ex.style.zIndex = ++zIndex; return; }
+    const t = i18n[lang], w = document.createElement('div');
+    w.id = 'win-' + id; w.className = 'window'; w.style.zIndex = ++zIndex;
+    let content = '';
+    if (id === 'mypc') content = `<div style="padding:8px;">FPS: <span id="fps">60</span><br><span data-i18n="res">${t.res}</span>: ${window.innerWidth}x${window.innerHeight}</div>`;
+    else if (id === 'paint') content = `<canvas id="c"></canvas>`;
+    else if (id === 'notepad') content = `<textarea style="width:100%;height:100%;background:#121216;color:#fff;border:none;resize:none;outline:none;"></textarea>`;
+    else if (id === 'calc') content = `<div class="calc-grid"><div class="calc-display" id="res">0</div><button class="calc-btn" onclick="calc('C')">C</button><button class="calc-btn" onclick="calc('/')">/</button><button class="calc-btn" onclick="calc('*')">*</button><button class="calc-btn" onclick="calc('-')">-</button><button class="calc-btn" onclick="calc('7')">7</button><button class="calc-btn" onclick="calc('8')">8</button><button class="calc-btn" onclick="calc('9')">9</button><button class="calc-btn" onclick="calc('+')">+</button><button class="calc-btn" onclick="calc('4')">4</button><button class="calc-btn" onclick="calc('5')">5</button><button class="calc-btn" onclick="calc('6')">6</button><button class="calc-btn" onclick="calc('=')">=</button><button class="calc-btn" onclick="calc('1')">1</button><button class="calc-btn" onclick="calc('2')">2</button><button class="calc-btn" onclick="calc('3')">3</button><button class="calc-btn" onclick="calc('0')">0</button></div>`;
+    else if (id === 'browser') content = `<div style="display:flex;gap:4px;margin-bottom:4px;"><input id="url" value="https://example.com" style="flex:1;background:#252530;color:#fff;border:1px solid #444;padding:4px;"><button class="tb-btn" onclick="document.getElementById('f').src=document.getElementById('url').value">Go</button></div><iframe id="f" src="https://example.com"></iframe>`;
+    else if (id === 'copilot') content = `<div class="chat-container"><div class="chat-messages" id="msgs"><div class="msg ai">${t.hi}</div></div><div class="chat-input"><input id="in"><button class="tb-btn" onclick="send()">OK</button></div></div>`;
+    else if (id === 'settings') content = `
+      <div class="setting-item"><label>${t.langLbl}</label>
+        <select onchange="setLang(this.value)"><option value="en" ${lang==='en'?'selected':''}>English</option><option value="ru" ${lang==='ru'?'selected':''}>Русский</option></select>
+      </div>
+      <div class="setting-item"><label>${t.wallLbl}</label>
+        <select onchange="setWall(this.value)"><option value="0" ${wallIdx===0?'selected':''}>${t.w0}</option><option value="1" ${wallIdx===1?'selected':''}>${t.w1}</option><option value="2" ${wallIdx===2?'selected':''}>${t.w2}</option></select>
+      </div>
+      <div class="setting-item"><label>${t.winCol}</label>
+        <input type="color" value="#1e1e24" onchange="document.querySelectorAll('.window').forEach(el=>el.style.background=this.value)">
+      </div>`;
+    w.innerHTML = `<div class="win-header" onpointerdown="drag(event,'${w.id}')"><span data-i18n="${id}">${t[id]}</span><button class="win-close" onclick="this.closest('.window').remove()"></button></div><div class="win-body">${content}</div>`;
+    document.body.appendChild(w);
+    if (id === 'paint') {
+      const c = document.getElementById('c'), ctx = c.getContext('2d');
+      c.width = w.clientWidth - 24; c.height = w.clientHeight - 62; ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 4;
+      c.onpointerdown = e => { ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); c.onpointermove = e => { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); }; };
+      c.onpointerup = () => c.onpointermove = null;
+    }
+  }
+  function drag(e, id) {
+    const w = document.getElementById(id); w.style.zIndex = ++zIndex;
+    const sx = e.clientX - w.offsetLeft, sy = e.clientY - w.offsetTop;
+    const m = e => { w.style.left = (e.clientX - sx) + 'px'; w.style.top = (e.clientY - sy) + 'px'; };
+    const u = () => { window.removeEventListener('pointermove', m); window.removeEventListener('pointerup', u); };
+    window.addEventListener('pointermove', m); window.addEventListener('pointerup', u);
+  }
+  let expr = '0';
+  function calc(v) {
+    const r = document.getElementById('res');
+    if (v === 'C') expr = '0'; else if (v === '=') { try { expr = eval(expr).toString(); } catch { expr = 'Err'; } }
+    else expr = (expr === '0' || expr === 'Err') ? v : expr + v;
+    r.innerText = expr;
+  }
+  function send() {
+    const i = document.getElementById('in'), m = document.getElementById('msgs');
+    if (!i.value) return;
+    const q = i.value; i.value = '';
+    m.innerHTML += `<div class="msg user">${q}</div>`;
+    setTimeout(() => { m.innerHTML += `<div class="msg ai">${i18n[lang].reply}${q}</div>`; m.scrollTop = m.scrollHeight; }, 400);
+  }
+</script>
+</body>
+</html>
